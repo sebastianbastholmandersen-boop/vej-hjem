@@ -3,6 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { MessageCircle, Send, Bot, User } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/components/ui/use-toast";
 
 interface Message {
   id: number;
@@ -19,6 +21,9 @@ const ChatSection = () => {
     }
   ]);
   const [inputValue, setInputValue] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [sessionId, setSessionId] = useState<string>('');
+  const { toast } = useToast();
 
   const sampleQuestions = [
     "Hvad betyder inkasso?",
@@ -27,15 +32,8 @@ const ChatSection = () => {
     "Hvad er forskellen på debitor og kreditor?"
   ];
 
-  const botResponses: { [key: string]: string } = {
-    "inkasso": "Inkasso betyder, at en virksomhed prøver at inddrive penge, som du skylder. Det er ikke farligt - det er bare en måde at få hjælp til at betale gæld tilbage på en struktureret måde.",
-    "afdragsplan": "En afdragsplan er en aftale om at betale din gæld tilbage i mindre beløb over tid. Vi kan hjælpe dig med at finde en plan, der passer til din økonomi.",
-    "ikke kan betale": "Hvis du ikke kan betale lige nu, er det vigtigste at tage kontakt hurtigst muligt. Der findes altid løsninger - det kan være en betalingsaftale eller anden hjælp.",
-    "debitor kreditor": "Du er debitor (den der skylder penge), og kreditor er den du skylder penge til. Enkelt sagt: du skylder, de får."
-  };
-
-  const handleSendMessage = (text: string) => {
-    if (!text.trim()) return;
+  const handleSendMessage = async (text: string) => {
+    if (!text.trim() || isLoading) return;
 
     // Add user message
     const userMessage: Message = {
@@ -45,30 +43,49 @@ const ChatSection = () => {
     };
 
     setMessages(prev => [...prev, userMessage]);
+    setInputValue("");
+    setIsLoading(true);
 
-    // Generate bot response
-    setTimeout(() => {
-      const lowercaseText = text.toLowerCase();
-      let response = "Tak for dit spørgsmål. Jeg forstår at det kan være forvirrende. Lad mig hjælpe dig med at finde den rigtige løsning til din situation.";
-
-      // Simple keyword matching for demo
-      for (const [keyword, botResponse] of Object.entries(botResponses)) {
-        if (lowercaseText.includes(keyword)) {
-          response = botResponse;
-          break;
+    try {
+      const { data, error } = await supabase.functions.invoke('chat', {
+        body: {
+          message: text,
+          session_id: sessionId || undefined
         }
+      });
+
+      if (error) {
+        console.error('Chat error:', error);
+        toast({
+          title: "Fejl",
+          description: "Der opstod en fejl. Prøv venligst igen.",
+          variant: "destructive",
+        });
+        return;
       }
 
       const botMessage: Message = {
         id: messages.length + 2,
-        text: response,
+        text: data.response,
         isBot: true
       };
 
       setMessages(prev => [...prev, botMessage]);
-    }, 1000);
+      
+      if (data.session_id && !sessionId) {
+        setSessionId(data.session_id);
+      }
 
-    setInputValue("");
+    } catch (error) {
+      console.error('Error sending message:', error);
+      toast({
+        title: "Fejl",
+        description: "Der opstod en fejl. Prøv venligst igen.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleQuestionClick = (question: string) => {
@@ -138,6 +155,20 @@ const ChatSection = () => {
                 )}
               </div>
             ))}
+            {isLoading && (
+              <div className="flex items-start gap-3 justify-start">
+                <div className="p-2 bg-primary/10 rounded-xl">
+                  <Bot className="w-5 h-5 text-primary" />
+                </div>
+                <div className="bg-muted text-foreground px-4 py-3 rounded-2xl">
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-primary rounded-full animate-bounce"></div>
+                    <div className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                    <div className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Input */}
@@ -147,6 +178,7 @@ const ChatSection = () => {
               onChange={(e) => setInputValue(e.target.value)}
               placeholder="Skriv dit spørgsmål her..."
               className="flex-1 rounded-xl border-border/50 focus:ring-primary/20"
+              disabled={isLoading}
               onKeyPress={(e) => {
                 if (e.key === 'Enter') {
                   handleSendMessage(inputValue);
@@ -156,8 +188,13 @@ const ChatSection = () => {
             <Button
               onClick={() => handleSendMessage(inputValue)}
               className="bg-gradient-hero hover:shadow-soft rounded-xl px-6"
+              disabled={isLoading || !inputValue.trim()}
             >
-              <Send className="w-5 h-5" />
+              {isLoading ? (
+                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+              ) : (
+                <Send className="w-5 h-5" />
+              )}
             </Button>
           </div>
         </Card>
