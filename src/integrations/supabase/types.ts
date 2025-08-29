@@ -14,6 +14,120 @@ export type Database = {
   }
   public: {
     Tables: {
+      budget_categories: {
+        Row: {
+          color: string | null
+          created_at: string
+          id: string
+          name: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string
+          id?: string
+          name: string
+          type: string
+          user_id: string
+        }
+        Update: {
+          color?: string | null
+          created_at?: string
+          id?: string
+          name?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      budget_items: {
+        Row: {
+          actual_amount: number
+          budget_id: string
+          category_id: string
+          created_at: string
+          id: string
+          name: string
+          planned_amount: number
+          updated_at: string
+        }
+        Insert: {
+          actual_amount?: number
+          budget_id: string
+          category_id: string
+          created_at?: string
+          id?: string
+          name: string
+          planned_amount?: number
+          updated_at?: string
+        }
+        Update: {
+          actual_amount?: number
+          budget_id?: string
+          category_id?: string
+          created_at?: string
+          id?: string
+          name?: string
+          planned_amount?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "budget_items_budget_id_fkey"
+            columns: ["budget_id"]
+            isOneToOne: false
+            referencedRelation: "budgets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "budget_items_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "budget_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      budgets: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          month: number
+          name: string
+          total_expenses: number | null
+          total_income: number | null
+          updated_at: string
+          user_id: string
+          year: number
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          month: number
+          name: string
+          total_expenses?: number | null
+          total_income?: number | null
+          updated_at?: string
+          user_id: string
+          year: number
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          month?: number
+          name?: string
+          total_expenses?: number | null
+          total_income?: number | null
+          updated_at?: string
+          user_id?: string
+          year?: number
+        }
+        Relationships: []
+      }
       chat_conversations: {
         Row: {
           created_at: string
@@ -69,6 +183,81 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      debts: {
+        Row: {
+          created_at: string
+          creditor_name: string
+          current_balance: number
+          due_date: string | null
+          id: string
+          interest_rate: number | null
+          minimum_payment: number | null
+          notes: string | null
+          original_amount: number
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          creditor_name: string
+          current_balance: number
+          due_date?: string | null
+          id?: string
+          interest_rate?: number | null
+          minimum_payment?: number | null
+          notes?: string | null
+          original_amount: number
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          creditor_name?: string
+          current_balance?: number
+          due_date?: string | null
+          id?: string
+          interest_rate?: number | null
+          minimum_payment?: number | null
+          notes?: string | null
+          original_amount?: number
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          first_name: string | null
+          id: string
+          last_name: string | null
+          phone: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          first_name?: string | null
+          id?: string
+          last_name?: string | null
+          phone?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          first_name?: string | null
+          id?: string
+          last_name?: string | null
+          phone?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
       }
     }
     Views: {
