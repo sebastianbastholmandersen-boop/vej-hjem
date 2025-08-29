@@ -1,9 +1,13 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Menu, X, MessageCircle } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
+import UserMenu from "./UserMenu";
 
 const Navigation = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { user, loading } = useAuth();
 
   const scrollToSection = (sectionId: string) => {
     const section = document.getElementById(sectionId);
@@ -47,25 +51,50 @@ const Navigation = () => {
                 {item.label}
               </button>
             ))}
-            <Button 
-              onClick={() => scrollToSection('ai-chat')}
-              className="bg-gradient-hero hover:shadow-soft rounded-xl"
-            >
-              Få hjælp nu
-            </Button>
+            
+            {!loading && (
+              user ? (
+                <div className="flex items-center gap-4">
+                  <Button 
+                    onClick={() => scrollToSection('ai-chat')}
+                    className="bg-gradient-hero hover:shadow-soft rounded-xl"
+                  >
+                    Få hjælp nu
+                  </Button>
+                  <UserMenu />
+                </div>
+              ) : (
+                <div className="flex items-center gap-4">
+                  <Button 
+                    onClick={() => scrollToSection('ai-chat')}
+                    className="bg-gradient-hero hover:shadow-soft rounded-xl"
+                  >
+                    Få hjælp nu
+                  </Button>
+                  <Link to="/auth">
+                    <Button variant="outline" className="bg-secondary/50 hover:bg-secondary border-border/50">
+                      Log ind
+                    </Button>
+                  </Link>
+                </div>
+              )
+            )}
           </div>
 
           {/* Mobile menu button */}
-          <button
-            className="md:hidden p-2"
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-          >
-            {isMenuOpen ? (
-              <X className="w-6 h-6 text-foreground" />
-            ) : (
-              <Menu className="w-6 h-6 text-foreground" />
-            )}
-          </button>
+          <div className="md:hidden flex items-center gap-2">
+            {!loading && user && <UserMenu />}
+            <button
+              className="p-2"
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+            >
+              {isMenuOpen ? (
+                <X className="w-6 h-6 text-foreground" />
+              ) : (
+                <Menu className="w-6 h-6 text-foreground" />
+              )}
+            </button>
+          </div>
         </div>
 
         {/* Mobile navigation */}
@@ -87,6 +116,13 @@ const Navigation = () => {
               >
                 Få hjælp nu
               </Button>
+              {!loading && !user && (
+                <Link to="/auth">
+                  <Button variant="outline" className="w-full mt-2 bg-secondary/50 hover:bg-secondary border-border/50">
+                    Log ind
+                  </Button>
+                </Link>
+              )}
             </div>
           </div>
         )}

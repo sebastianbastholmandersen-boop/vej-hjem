@@ -47,11 +47,17 @@ const ChatSection = () => {
     setIsLoading(true);
 
     try {
+      const body: any = {
+        message: text,
+      };
+
+      // Include session_id if we have one
+      if (sessionId) {
+        body.session_id = sessionId;
+      }
+
       const { data, error } = await supabase.functions.invoke('chat', {
-        body: {
-          message: text,
-          session_id: sessionId || undefined
-        }
+        body
       });
 
       if (error) {
