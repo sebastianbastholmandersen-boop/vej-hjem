@@ -131,7 +131,7 @@ const ContactSection = () => {
               <Card className="p-4 shadow-card border-border/50 text-center">
                 <Mail className="w-6 h-6 text-primary mx-auto mb-2" />
                 <h5 className="font-medium text-foreground text-sm">E-mail</h5>
-                <p className="text-xs text-muted-foreground">hjaelp@gældassistent.dk</p>
+                <p className="text-xs text-muted-foreground">info@gaeldvej.dk</p>
               </Card>
               <Card className="p-4 shadow-card border-border/50 text-center">
                 <Phone className="w-6 h-6 text-primary mx-auto mb-2" />

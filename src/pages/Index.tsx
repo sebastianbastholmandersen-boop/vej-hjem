@@ -29,7 +29,7 @@ const Index = () => {
       <footer className="bg-foreground text-background py-8 px-6">
         <div className="max-w-6xl mx-auto text-center">
           <p className="text-sm opacity-80">
-            © 2024 Gæld Assistent. Vi hjælper mennesker med at forstå og håndtere gæld på en tryg måde.
+            © 2024 GældVej. Vi hjælper mennesker med at forstå og håndtere gæld på en tryg måde.
           </p>
           <p className="text-xs opacity-60 mt-2">
             Udviklet med empati og respekt for alle, der har brug for hjælp.

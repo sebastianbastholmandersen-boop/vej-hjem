@@ -36,7 +36,7 @@ const Navigation = () => {
               <MessageCircle className="w-5 h-5 text-white" />
             </div>
             <span className="text-lg font-medium text-foreground">
-              Gæld Assistent
+              GældVej
             </span>
           </div>
 
