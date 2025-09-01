@@ -1,5 +1,5 @@
 import { Card } from "@/components/ui/card";
-import { Heart, Users, Shield, Scale, Brain } from "lucide-react";
+import { Heart, Users, Shield, Scale, Brain, FileText } from "lucide-react";
 
 const AboutSection = () => {
   const values = [
@@ -94,6 +94,48 @@ const AboutSection = () => {
               <p className="text-xs text-muted-foreground">
                 Vores grundlæggende rådgivning er altid gratis og uforpligtende
               </p>
+            </div>
+          </div>
+        </Card>
+
+        {/* Ethics section */}
+        <Card className="p-8 shadow-card border-border/50 bg-secondary/20 backdrop-blur-sm mt-8">
+          <div className="text-center mb-6">
+            <div className="flex items-center justify-center mb-4">
+              <div className="p-3 bg-gradient-trust rounded-xl shadow-soft">
+                <FileText className="w-6 h-6 text-white" />
+              </div>
+            </div>
+            <h3 className="text-2xl font-light text-foreground mb-4">
+              Vores etiske tilgang
+            </h3>
+          </div>
+          
+          <div className="max-w-4xl mx-auto">
+            <div className="bg-card/80 rounded-2xl p-6 border border-border/30">
+              <h4 className="text-lg font-medium text-foreground mb-4">
+                Samtykke- og dataetik-erklæring
+              </h4>
+              <p className="text-muted-foreground leading-relaxed">
+                Når du bruger vores AI, behandler vi kun de oplysninger, du selv deler. Dine data bruges til at give dig bedre svar og til anonymiseret statistik, 
+                aldrig til at dømme eller presse dig. Du kan til enhver tid stoppe og få slettet dine oplysninger. Vores 
+                AI er en neutral hjælper – ikke et inkassofirma – og vores mål er, at du føler dig set og forstået.
+              </p>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
+              <div className="text-center">
+                <h5 className="text-sm font-medium text-foreground mb-2">Din ret til kontrol</h5>
+                <p className="text-xs text-muted-foreground">
+                  Du bestemmer selv, hvad du deler, og kan altid få indsigt i eller slettet dine data
+                </p>
+              </div>
+              <div className="text-center">
+                <h5 className="text-sm font-medium text-foreground mb-2">Neutral hjælper</h5>
+                <p className="text-xs text-muted-foreground">
+                  Vi er ikke et inkassofirma - vi er kun her for at hjælpe dig forstå og handle
+                </p>
+              </div>
             </div>
           </div>
         </Card>
