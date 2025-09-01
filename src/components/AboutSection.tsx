@@ -1,5 +1,5 @@
 import { Card } from "@/components/ui/card";
-import { Heart, Users, Shield, Scale } from "lucide-react";
+import { Heart, Users, Shield, Scale, Brain } from "lucide-react";
 
 const AboutSection = () => {
   const values = [
@@ -12,6 +12,11 @@ const AboutSection = () => {
       icon: Users,
       title: "Menneskelig tilgang",
       description: "Gæld er ikke bare tal - det handler om mennesker. Vi lytter til din situation og finder løsninger, der passer til dit liv."
+    },
+    {
+      icon: Brain,
+      title: "Ekspert-baseret AI",
+      description: "Vores AI-assistent er trænet på tankegangen fra erfarne inkassomedarbejdere og gældsrådgivere, så du får praktiske og realistiske løsninger."
     },
     {
       icon: Shield,
@@ -37,7 +42,7 @@ const AboutSection = () => {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
           {values.map((value, index) => (
             <Card 
               key={index} 
