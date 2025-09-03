@@ -149,9 +149,14 @@ Kort sagt: Du er en "mægler med samvittighed" – du forstår brugerens følels
     });
 
     if (!response.ok) {
-      const errorData = await response.text();
-      console.error('OpenAI API error:', errorData);
-      return new Response(JSON.stringify({ error: 'Failed to get AI response' }), {
+      const errorText = await response.text();
+      console.error('OpenAI API error response:', response.status, response.statusText);
+      console.error('OpenAI API error details:', errorText);
+      return new Response(JSON.stringify({ 
+        error: 'Failed to get AI response',
+        details: `OpenAI API error: ${response.status} ${response.statusText}`,
+        apiError: errorText
+      }), {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
