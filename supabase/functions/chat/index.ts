@@ -24,9 +24,20 @@ serve(async (req) => {
     }
 
     const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
+    console.log('API Key exists:', !!openAIApiKey);
+    console.log('API Key starts with sk-:', openAIApiKey?.startsWith('sk-'));
+    
     if (!openAIApiKey) {
       console.error('OPENAI_API_KEY is not set');
       return new Response(JSON.stringify({ error: 'OpenAI API key not configured' }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    if (!openAIApiKey.startsWith('sk-')) {
+      console.error('Invalid OpenAI API key format');
+      return new Response(JSON.stringify({ error: 'Invalid OpenAI API key format' }), {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
@@ -130,9 +141,10 @@ Kort sagt: Du er en "mægler med samvittighed" – du forstår brugerens følels
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-5-mini-2025-08-07',
+        model: 'gpt-4o-mini',
         messages: openAIMessages,
-        max_completion_tokens: 500,
+        max_tokens: 500,
+        temperature: 0.7,
       }),
     });
 
