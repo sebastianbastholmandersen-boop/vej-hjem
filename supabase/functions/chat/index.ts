@@ -23,13 +23,22 @@ serve(async (req) => {
       });
     }
 
+    // Debug environment variables
+    const allEnvKeys = Object.keys(Deno.env.toObject());
+    console.log('Available environment variables:', allEnvKeys);
+    
     const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
-    console.log('API Key exists:', !!openAIApiKey);
-    console.log('API Key starts with sk-:', openAIApiKey?.startsWith('sk-'));
+    console.log('OPENAI_API_KEY exists:', !!openAIApiKey);
+    console.log('OPENAI_API_KEY length:', openAIApiKey?.length || 0);
+    console.log('OPENAI_API_KEY first 10 chars:', openAIApiKey?.substring(0, 10) || 'none');
     
     if (!openAIApiKey) {
       console.error('OPENAI_API_KEY is not set');
-      return new Response(JSON.stringify({ error: 'OpenAI API key not configured' }), {
+      console.error('Available env keys:', allEnvKeys.join(', '));
+      return new Response(JSON.stringify({ 
+        error: 'OpenAI API key not configured',
+        debug: { availableKeys: allEnvKeys }
+      }), {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
