@@ -1,0 +1,1 @@
+INSERT INTO user_roles (user_id, role) VALUES ('bc3b4740-5904-4fe8-909b-835527d9072d', 'admin'::app_role);
