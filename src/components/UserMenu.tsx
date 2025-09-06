@@ -9,9 +9,11 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useAuth } from "@/hooks/useAuth";
-import { LogOut, User, Building2 } from "lucide-react";
+import { useAdmin } from "@/hooks/useAdmin";
+import { LogOut, User, Building2, Shield } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { Link } from "react-router-dom";
 
 interface Profile {
   user_type: 'individual' | 'company';
@@ -23,6 +25,7 @@ interface Profile {
 
 const UserMenu = () => {
   const { user, signOut } = useAuth();
+  const { isAdmin } = useAdmin();
   const { toast } = useToast();
   const [profile, setProfile] = useState<Profile | null>(null);
 
@@ -125,6 +128,12 @@ const UserMenu = () => {
               )}
             </p>
             <p className="text-xs text-muted-foreground">{user.email}</p>
+            {isAdmin && (
+              <p className="text-xs text-orange-600 font-medium flex items-center">
+                <Shield className="inline w-3 h-3 mr-1" />
+                Administrator
+              </p>
+            )}
           </div>
         </div>
         <DropdownMenuSeparator />
@@ -132,6 +141,14 @@ const UserMenu = () => {
           <User className="mr-2 h-4 w-4" />
           <span>Profil</span>
         </DropdownMenuItem>
+        {isAdmin && (
+          <DropdownMenuItem asChild>
+            <Link to="/admin">
+              <Shield className="mr-2 h-4 w-4" />
+              <span>Admin Dashboard</span>
+            </Link>
+          </DropdownMenuItem>
+        )}
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={handleSignOut}>
           <LogOut className="mr-2 h-4 w-4" />
