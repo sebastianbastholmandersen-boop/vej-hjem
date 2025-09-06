@@ -21,9 +21,9 @@ export const useAdmin = () => {
           .select('role')
           .eq('user_id', user.id)
           .eq('role', 'admin')
-          .maybeSingle();
+          .single();
 
-        if (error) {
+        if (error && error.code !== 'PGRST116') {
           console.error('Error checking admin status:', error);
           setIsAdmin(false);
         } else {
