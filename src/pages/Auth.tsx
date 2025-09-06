@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import { Loader2, LogIn, UserPlus } from "lucide-react";
@@ -16,6 +17,11 @@ const Auth = () => {
   const [signupEmail, setSignupEmail] = useState("");
   const [signupPassword, setSignupPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [userType, setUserType] = useState<'individual' | 'company'>('individual');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [companyName, setCompanyName] = useState('');
+  const [cvrNumber, setCvrNumber] = useState('');
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -89,15 +95,46 @@ const Auth = () => {
       return;
     }
 
+    // Validate required fields based on user type
+    if (userType === 'individual') {
+      if (!firstName.trim() || !lastName.trim()) {
+        toast({
+          title: "Manglende oplysninger",
+          description: "Udfyld venligst både fornavn og efternavn.",
+          variant: "destructive",
+        });
+        return;
+      }
+    } else {
+      if (!companyName.trim() || !cvrNumber.trim()) {
+        toast({
+          title: "Manglende oplysninger",
+          description: "Udfyld venligst både virksomhedsnavn og CVR-nummer.",
+          variant: "destructive",
+        });
+        return;
+      }
+    }
+
     setLoading(true);
     try {
       const redirectUrl = `${window.location.origin}/`;
+      
+      // Prepare metadata based on user type
+      const userMetadata = {
+        user_type: userType,
+        ...(userType === 'individual' 
+          ? { first_name: firstName.trim(), last_name: lastName.trim() }
+          : { company_name: companyName.trim(), cvr_number: cvrNumber.trim() }
+        )
+      };
       
       const { error } = await supabase.auth.signUp({
         email: signupEmail,
         password: signupPassword,
         options: {
-          emailRedirectTo: redirectUrl
+          emailRedirectTo: redirectUrl,
+          data: userMetadata
         }
       });
 
@@ -123,6 +160,10 @@ const Auth = () => {
         setSignupEmail("");
         setSignupPassword("");
         setConfirmPassword("");
+        setFirstName("");
+        setLastName("");
+        setCompanyName("");
+        setCvrNumber("");
       }
     } catch (error) {
       toast({
@@ -205,6 +246,75 @@ const Auth = () => {
 
             <TabsContent value="signup">
               <form onSubmit={handleSignup} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="user-type">Jeg er</Label>
+                  <Select value={userType} onValueChange={(value: 'individual' | 'company') => setUserType(value)}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Vælg brugertype" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="individual">Privatperson</SelectItem>
+                      <SelectItem value="company">Virksomhed</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {userType === 'individual' ? (
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="first-name">Fornavn</Label>
+                      <Input
+                        id="first-name"
+                        type="text"
+                        placeholder="Dit fornavn"
+                        value={firstName}
+                        onChange={(e) => setFirstName(e.target.value)}
+                        required
+                        disabled={loading}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="last-name">Efternavn</Label>
+                      <Input
+                        id="last-name"
+                        type="text"
+                        placeholder="Dit efternavn"
+                        value={lastName}
+                        onChange={(e) => setLastName(e.target.value)}
+                        required
+                        disabled={loading}
+                      />
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    <div className="space-y-2">
+                      <Label htmlFor="company-name">Virksomhedsnavn</Label>
+                      <Input
+                        id="company-name"
+                        type="text"
+                        placeholder="Virksomhedens navn"
+                        value={companyName}
+                        onChange={(e) => setCompanyName(e.target.value)}
+                        required
+                        disabled={loading}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="cvr-number">CVR-nummer</Label>
+                      <Input
+                        id="cvr-number"
+                        type="text"
+                        placeholder="12345678"
+                        value={cvrNumber}
+                        onChange={(e) => setCvrNumber(e.target.value)}
+                        required
+                        disabled={loading}
+                      />
+                    </div>
+                  </>
+                )}
+
                 <div className="space-y-2">
                   <Label htmlFor="signup-email">Email</Label>
                   <Input
