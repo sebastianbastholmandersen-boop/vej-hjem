@@ -12,6 +12,9 @@ import { Loader2, LogIn, UserPlus } from "lucide-react";
 
 const Auth = () => {
   const [loading, setLoading] = useState(false);
+  const [forgotPasswordMode, setForgotPasswordMode] = useState(false);
+  const [forgotPasswordEmail, setForgotPasswordEmail] = useState("");
+  const [resetEmailSent, setResetEmailSent] = useState(false);
   const [loginEmail, setLoginEmail] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
   const [signupEmail, setSignupEmail] = useState("");
@@ -176,6 +179,43 @@ const Auth = () => {
     }
   };
 
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!forgotPasswordEmail) return;
+
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(
+        forgotPasswordEmail,
+        {
+          redirectTo: `${window.location.origin}/auth?mode=reset`,
+        }
+      );
+
+      if (error) {
+        toast({
+          title: "Fejl",
+          description: error.message,
+          variant: "destructive",
+        });
+      } else {
+        setResetEmailSent(true);
+        toast({
+          title: "Email sendt!",
+          description: "Tjek din email for instruktioner om nulstilling af adgangskode.",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Der opstod en fejl",
+        description: "Prøv venligst igen senere.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-primary flex items-center justify-center px-6">
       <div className="w-full max-w-md">
@@ -189,17 +229,92 @@ const Auth = () => {
         </div>
 
         <Card className="p-8 shadow-card border-border/50">
-          <Tabs defaultValue="login" className="w-full">
-            <TabsList className="grid w-full grid-cols-2 mb-6">
-              <TabsTrigger value="login" className="flex items-center gap-2">
-                <LogIn className="w-4 h-4" />
-                Log ind
-              </TabsTrigger>
-              <TabsTrigger value="signup" className="flex items-center gap-2">
-                <UserPlus className="w-4 h-4" />
-                Opret konto
-              </TabsTrigger>
-            </TabsList>
+          {forgotPasswordMode ? (
+            <div className="space-y-6">
+              <div className="text-center">
+                <h2 className="text-2xl font-semibold text-foreground mb-2">
+                  Glemt adgangskode?
+                </h2>
+                <p className="text-muted-foreground">
+                  {resetEmailSent 
+                    ? "Vi har sendt dig en email med instruktioner"
+                    : "Indtast din email for at nulstille din adgangskode"
+                  }
+                </p>
+              </div>
+
+              {!resetEmailSent ? (
+                <form onSubmit={handleForgotPassword} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="forgot-email">Email</Label>
+                    <Input
+                      id="forgot-email"
+                      type="email"
+                      value={forgotPasswordEmail}
+                      onChange={(e) => setForgotPasswordEmail(e.target.value)}
+                      placeholder="din@email.dk"
+                      required
+                      disabled={loading}
+                    />
+                  </div>
+                  <Button
+                    type="submit"
+                    className="w-full bg-gradient-hero hover:shadow-soft"
+                    disabled={loading || !forgotPasswordEmail}
+                  >
+                    {loading ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Sender email...
+                      </>
+                    ) : (
+                      "Send nulstillingslink"
+                    )}
+                  </Button>
+                </form>
+              ) : (
+                <div className="text-center space-y-4">
+                  <p className="text-sm text-muted-foreground">
+                    Tjek din indbakke og følg instruktionerne i emailen for at nulstille din adgangskode.
+                  </p>
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setResetEmailSent(false);
+                      setForgotPasswordEmail("");
+                    }}
+                  >
+                    Send ny email
+                  </Button>
+                </div>
+              )}
+
+              <div className="text-center">
+                <Button
+                  variant="ghost"
+                  onClick={() => {
+                    setForgotPasswordMode(false);
+                    setResetEmailSent(false);
+                    setForgotPasswordEmail("");
+                  }}
+                  className="text-muted-foreground hover:text-foreground"
+                >
+                  ← Tilbage til login
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <Tabs defaultValue="login" className="w-full">
+              <TabsList className="grid w-full grid-cols-2 mb-6">
+                <TabsTrigger value="login" className="flex items-center gap-2">
+                  <LogIn className="w-4 h-4" />
+                  Log ind
+                </TabsTrigger>
+                <TabsTrigger value="signup" className="flex items-center gap-2">
+                  <UserPlus className="w-4 h-4" />
+                  Opret konto
+                </TabsTrigger>
+              </TabsList>
 
             <TabsContent value="login">
               <form onSubmit={handleLogin} className="space-y-4">
@@ -241,6 +356,15 @@ const Auth = () => {
                     "Log ind"
                   )}
                 </Button>
+                <div className="text-center mt-4">
+                  <Button
+                    variant="ghost"
+                    onClick={() => setForgotPasswordMode(true)}
+                    className="text-sm text-muted-foreground hover:text-foreground"
+                  >
+                    Glemt din adgangskode?
+                  </Button>
+                </div>
               </form>
             </TabsContent>
 
@@ -370,6 +494,7 @@ const Auth = () => {
               </form>
             </TabsContent>
           </Tabs>
+          )}
         </Card>
 
         <div className="text-center mt-6">
