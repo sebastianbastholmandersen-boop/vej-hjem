@@ -5,6 +5,7 @@ import { Card } from "@/components/ui/card";
 import { MessageCircle, Send, Bot, User } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
+import coinMascot from "@/assets/coin-mascot.png";
 
 interface Message {
   id: number;
@@ -142,7 +143,7 @@ const ChatSection = () => {
               >
                 {message.isBot && (
                   <div className="p-2 bg-primary/10 rounded-xl">
-                    <Bot className="w-5 h-5 text-primary" />
+                    <img src={coinMascot} alt="Gæld AI maskot" className="w-6 h-6" />
                   </div>
                 )}
                 <div
@@ -164,7 +165,7 @@ const ChatSection = () => {
             {isLoading && (
               <div className="flex items-start gap-3 justify-start">
                 <div className="p-2 bg-primary/10 rounded-xl">
-                  <Bot className="w-5 h-5 text-primary" />
+                  <img src={coinMascot} alt="Gæld AI maskot" className="w-6 h-6" />
                 </div>
                 <div className="bg-muted text-foreground px-4 py-3 rounded-2xl">
                   <div className="flex items-center gap-2">
