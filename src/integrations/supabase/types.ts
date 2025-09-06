@@ -231,31 +231,46 @@ export type Database = {
       }
       profiles: {
         Row: {
+          company_address: string | null
+          company_name: string | null
+          contact_person: string | null
           created_at: string
+          cvr_number: string | null
           first_name: string | null
           id: string
           last_name: string | null
           phone: string | null
           updated_at: string
           user_id: string
+          user_type: Database["public"]["Enums"]["user_type"]
         }
         Insert: {
+          company_address?: string | null
+          company_name?: string | null
+          contact_person?: string | null
           created_at?: string
+          cvr_number?: string | null
           first_name?: string | null
           id?: string
           last_name?: string | null
           phone?: string | null
           updated_at?: string
           user_id: string
+          user_type?: Database["public"]["Enums"]["user_type"]
         }
         Update: {
+          company_address?: string | null
+          company_name?: string | null
+          contact_person?: string | null
           created_at?: string
+          cvr_number?: string | null
           first_name?: string | null
           id?: string
           last_name?: string | null
           phone?: string | null
           updated_at?: string
           user_id?: string
+          user_type?: Database["public"]["Enums"]["user_type"]
         }
         Relationships: []
       }
@@ -267,7 +282,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      user_type: "individual" | "company"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -394,6 +409,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      user_type: ["individual", "company"],
+    },
   },
 } as const
