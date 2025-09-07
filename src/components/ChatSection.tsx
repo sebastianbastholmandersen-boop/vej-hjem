@@ -133,41 +133,41 @@ const ChatSection = () => {
         {/* Chat interface */}
         <Card className="p-6 shadow-card border-border/50">
           {/* Messages */}
-          <div className="space-y-4 mb-6 max-h-96 overflow-y-auto">
+          <div className="space-y-6 mb-8 max-h-[600px] overflow-y-auto">
             {messages.map((message) => (
               <div
                 key={message.id}
-                className={`flex items-start gap-3 ${
+                className={`flex items-start gap-4 ${
                   message.isBot ? 'justify-start' : 'justify-end'
                 }`}
               >
                 {message.isBot && (
-                  <div className="p-2 bg-primary/10 rounded-xl">
+                  <div className="p-2 bg-primary/10 rounded-xl flex-shrink-0">
                     <img src={coinMascot} alt="Gæld AI maskot" className="w-6 h-6" />
                   </div>
                 )}
                 <div
-                  className={`max-w-xs lg:max-w-md px-4 py-3 rounded-2xl ${
+                  className={`max-w-sm lg:max-w-2xl px-5 py-4 rounded-2xl ${
                     message.isBot
                       ? 'bg-muted text-foreground'
                       : 'bg-gradient-hero text-white'
                   }`}
                 >
-                  <p className="text-sm leading-relaxed">{message.text}</p>
+                  <p className="text-base leading-relaxed whitespace-pre-line">{message.text}</p>
                 </div>
                 {!message.isBot && (
-                  <div className="p-2 bg-accent/10 rounded-xl">
+                  <div className="p-2 bg-accent/10 rounded-xl flex-shrink-0">
                     <User className="w-5 h-5 text-accent" />
                   </div>
                 )}
               </div>
             ))}
             {isLoading && (
-              <div className="flex items-start gap-3 justify-start">
-                <div className="p-2 bg-primary/10 rounded-xl">
+              <div className="flex items-start gap-4 justify-start">
+                <div className="p-2 bg-primary/10 rounded-xl flex-shrink-0">
                   <img src={coinMascot} alt="Gæld AI maskot" className="w-6 h-6" />
                 </div>
-                <div className="bg-muted text-foreground px-4 py-3 rounded-2xl">
+                <div className="bg-muted text-foreground px-5 py-4 rounded-2xl">
                   <div className="flex items-center gap-2">
                     <div className="w-2 h-2 bg-primary rounded-full animate-bounce"></div>
                     <div className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
