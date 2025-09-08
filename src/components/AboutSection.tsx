@@ -42,27 +42,94 @@ const AboutSection = () => {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
-          {values.map((value, index) => (
-            <Card 
-              key={index} 
-              className="p-6 shadow-card border-border/50 bg-card/80 backdrop-blur-sm hover:shadow-soft transition-all duration-300"
-            >
+        <div className="relative mb-16">
+          {/* Dynamic grid layout with different card sizes */}
+          <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-6 gap-4 md:gap-6">
+            {/* Large featured card - first value */}
+            <Card className="md:col-span-2 lg:col-span-3 p-8 shadow-card border-border/50 bg-card/80 backdrop-blur-sm hover:shadow-soft hover:scale-[1.02] transition-all duration-500 animate-fade-in">
+              <div className="flex flex-col items-center text-center">
+                <div className="p-4 bg-gradient-hero rounded-2xl shadow-soft mb-6">
+                  <Heart className="w-8 h-8 text-white" />
+                </div>
+                <h3 className="text-2xl font-medium text-foreground mb-4">
+                  {values[0].title}
+                </h3>
+                <p className="text-muted-foreground leading-relaxed text-lg">
+                  {values[0].description}
+                </p>
+              </div>
+            </Card>
+
+            {/* Two medium cards - second and third values */}
+            <Card className="md:col-span-2 lg:col-span-3 p-6 shadow-card border-border/50 bg-card/80 backdrop-blur-sm hover:shadow-soft hover:scale-[1.02] transition-all duration-500 animate-fade-in [animation-delay:200ms]">
               <div className="flex items-start gap-4">
-                <div className="p-3 bg-gradient-hero rounded-xl shadow-soft flex-shrink-0">
-                  <value.icon className="w-6 h-6 text-white" />
+                <div className="p-3 bg-gradient-trust rounded-xl shadow-soft flex-shrink-0">
+                  <Users className="w-6 h-6 text-white" />
                 </div>
                 <div>
                   <h3 className="text-xl font-medium text-foreground mb-3">
-                    {value.title}
+                    {values[1].title}
                   </h3>
                   <p className="text-muted-foreground leading-relaxed">
-                    {value.description}
+                    {values[1].description}
                   </p>
                 </div>
               </div>
             </Card>
-          ))}
+
+            <Card className="md:col-span-2 lg:col-span-3 p-6 shadow-card border-border/50 bg-card/80 backdrop-blur-sm hover:shadow-soft hover:scale-[1.02] transition-all duration-500 animate-fade-in [animation-delay:400ms]">
+              <div className="flex items-start gap-4">
+                <div className="p-3 bg-gradient-hero rounded-xl shadow-soft flex-shrink-0">
+                  <Brain className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-medium text-foreground mb-3">
+                    {values[2].title}
+                  </h3>
+                  <p className="text-muted-foreground leading-relaxed">
+                    {values[2].description}
+                  </p>
+                </div>
+              </div>
+            </Card>
+
+            {/* Compact cards for last two values */}
+            <Card className="md:col-span-2 lg:col-span-3 p-5 shadow-card border-border/50 bg-secondary/30 backdrop-blur-sm hover:shadow-soft hover:scale-[1.02] transition-all duration-500 animate-fade-in [animation-delay:600ms]">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 bg-gradient-trust rounded-lg shadow-soft flex-shrink-0">
+                  <Shield className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-medium text-foreground mb-2">
+                    {values[3].title}
+                  </h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    {values[3].description}
+                  </p>
+                </div>
+              </div>
+            </Card>
+
+            <Card className="md:col-span-2 lg:col-span-3 p-5 shadow-card border-border/50 bg-accent/10 backdrop-blur-sm hover:shadow-soft hover:scale-[1.02] transition-all duration-500 animate-fade-in [animation-delay:800ms]">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 bg-gradient-hero rounded-lg shadow-soft flex-shrink-0">
+                  <Scale className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-medium text-foreground mb-2">
+                    {values[4].title}
+                  </h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    {values[4].description}
+                  </p>
+                </div>
+              </div>
+            </Card>
+          </div>
+
+          {/* Decorative floating elements */}
+          <div className="absolute -top-8 -left-8 w-16 h-16 bg-primary/5 rounded-full blur-xl animate-pulse" />
+          <div className="absolute -bottom-4 -right-4 w-12 h-12 bg-accent/5 rounded-full blur-lg animate-pulse [animation-delay:1s]" />
         </div>
 
         {/* Mission statement */}
