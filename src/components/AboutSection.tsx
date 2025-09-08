@@ -42,7 +42,7 @@ const AboutSection = () => {
           </p>
         </div>
 
-        <div className="relative mb-16 h-[600px] md:h-[700px] flex items-center justify-center">
+        <div className="relative mb-16 h-[700px] md:h-[800px] flex items-center justify-center">
           {/* Pentagon layout container */}
           <div className="relative w-full max-w-4xl h-full">
             {/* Center decorative element */}
@@ -51,7 +51,7 @@ const AboutSection = () => {
             {/* Pentagon points - each card positioned at pentagon vertices */}
             {values.map((value, index) => {
               const angle = (index * 72 - 90) * (Math.PI / 180); // 72 degrees apart, starting from top
-              const radius = 220; // Distance from center
+              const radius = 280; // Increased distance from center for more separation
               const x = Math.cos(angle) * radius;
               const y = Math.sin(angle) * radius;
               
@@ -94,11 +94,11 @@ const AboutSection = () => {
               {values.map((_, index) => {
                 const angle1 = (index * 72 - 90) * (Math.PI / 180);
                 const angle2 = ((index + 1) % 5 * 72 - 90) * (Math.PI / 180);
-                const radius = 220;
-                const x1 = Math.cos(angle1) * radius + 320; // Adjust for center
-                const y1 = Math.sin(angle1) * radius + 300; // Adjust for center  
-                const x2 = Math.cos(angle2) * radius + 320;
-                const y2 = Math.sin(angle2) * radius + 300;
+                const radius = 280; // Match the increased radius
+                const x1 = Math.cos(angle1) * radius + 400; // Adjust for center
+                const y1 = Math.sin(angle1) * radius + 350; // Adjust for center  
+                const x2 = Math.cos(angle2) * radius + 400;
+                const y2 = Math.sin(angle2) * radius + 350;
                 
                 return (
                   <line
