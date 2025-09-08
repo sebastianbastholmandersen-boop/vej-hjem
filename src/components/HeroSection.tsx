@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import heroImage from "@/assets/hero-image.jpg";
+import heroImage from "@/assets/consultation-hero.jpg";
 
 const HeroSection = () => {
   const scrollToChat = () => {
@@ -16,7 +16,7 @@ const HeroSection = () => {
       <div className="absolute inset-0 opacity-20">
         <img 
           src={heroImage} 
-          alt="Rolig person der får hjælp med gæld" 
+          alt="Person der får rådgivning om gæld i rolige omgivelser" 
           className="w-full h-full object-cover"
         />
       </div>
