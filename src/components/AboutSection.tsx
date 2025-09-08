@@ -42,94 +42,111 @@ const AboutSection = () => {
           </p>
         </div>
 
-        <div className="relative mb-16">
-          {/* Dynamic grid layout with different card sizes */}
-          <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-6 gap-4 md:gap-6">
-            {/* Large featured card - first value */}
-            <Card className="md:col-span-2 lg:col-span-3 p-8 shadow-card border-border/50 bg-card/80 backdrop-blur-sm hover:shadow-soft hover:scale-[1.02] transition-all duration-500 animate-fade-in">
-              <div className="flex flex-col items-center text-center">
-                <div className="p-4 bg-gradient-hero rounded-2xl shadow-soft mb-6">
-                  <Heart className="w-8 h-8 text-white" />
-                </div>
-                <h3 className="text-2xl font-medium text-foreground mb-4">
-                  {values[0].title}
-                </h3>
-                <p className="text-muted-foreground leading-relaxed text-lg">
-                  {values[0].description}
-                </p>
-              </div>
-            </Card>
+        <div className="relative mb-16 h-[600px] md:h-[700px] flex items-center justify-center">
+          {/* Pentagon layout container */}
+          <div className="relative w-full max-w-4xl h-full">
+            {/* Center decorative element */}
+            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-16 h-16 bg-gradient-hero rounded-full shadow-glow animate-pulse z-10"></div>
+            
+            {/* Pentagon points - each card positioned at pentagon vertices */}
+            {values.map((value, index) => {
+              const angle = (index * 72 - 90) * (Math.PI / 180); // 72 degrees apart, starting from top
+              const radius = 220; // Distance from center
+              const x = Math.cos(angle) * radius;
+              const y = Math.sin(angle) * radius;
+              
+              return (
+                <Card 
+                  key={index}
+                  className="absolute w-64 p-6 shadow-card border-border/50 bg-card/80 backdrop-blur-sm hover:shadow-soft hover:scale-105 transition-all duration-500 animate-fade-in"
+                  style={{
+                    left: '50%',
+                    top: '50%',
+                    transform: `translate(calc(-50% + ${x}px), calc(-50% + ${y}px))`,
+                    animationDelay: `${index * 200}ms`
+                  }}
+                >
+                  <div className="flex flex-col items-center text-center">
+                    <div className="p-3 bg-gradient-hero rounded-xl shadow-soft mb-4">
+                      <value.icon className="w-6 h-6 text-white" />
+                    </div>
+                    <h3 className="text-lg font-medium text-foreground mb-3">
+                      {value.title}
+                    </h3>
+                    <p className="text-sm text-muted-foreground leading-relaxed">
+                      {value.description}
+                    </p>
+                  </div>
+                </Card>
+              );
+            })}
+            
+            {/* Connecting lines to create pentagon shape */}
+            <svg className="absolute inset-0 w-full h-full pointer-events-none" style={{ zIndex: 1 }}>
+              <defs>
+                <linearGradient id="pentagonGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity="0.1" />
+                  <stop offset="100%" stopColor="hsl(var(--accent))" stopOpacity="0.1" />
+                </linearGradient>
+              </defs>
+              {values.map((_, index) => {
+                const angle1 = (index * 72 - 90) * (Math.PI / 180);
+                const angle2 = ((index + 1) % 5 * 72 - 90) * (Math.PI / 180);
+                const radius = 220;
+                const x1 = Math.cos(angle1) * radius + 320; // Adjust for center
+                const y1 = Math.sin(angle1) * radius + 300; // Adjust for center  
+                const x2 = Math.cos(angle2) * radius + 320;
+                const y2 = Math.sin(angle2) * radius + 300;
+                
+                return (
+                  <line
+                    key={index}
+                    x1={x1}
+                    y1={y1}
+                    x2={x2}
+                    y2={y2}
+                    stroke="url(#pentagonGradient)"
+                    strokeWidth="2"
+                    strokeDasharray="5,5"
+                    className="animate-fade-in"
+                    style={{ animationDelay: `${index * 100 + 1000}ms` }}
+                  />
+                );
+              })}
+            </svg>
 
-            {/* Two medium cards - second and third values */}
-            <Card className="md:col-span-2 lg:col-span-3 p-6 shadow-card border-border/50 bg-card/80 backdrop-blur-sm hover:shadow-soft hover:scale-[1.02] transition-all duration-500 animate-fade-in [animation-delay:200ms]">
-              <div className="flex items-start gap-4">
-                <div className="p-3 bg-gradient-trust rounded-xl shadow-soft flex-shrink-0">
-                  <Users className="w-6 h-6 text-white" />
-                </div>
-                <div>
-                  <h3 className="text-xl font-medium text-foreground mb-3">
-                    {values[1].title}
-                  </h3>
-                  <p className="text-muted-foreground leading-relaxed">
-                    {values[1].description}
-                  </p>
-                </div>
-              </div>
-            </Card>
-
-            <Card className="md:col-span-2 lg:col-span-3 p-6 shadow-card border-border/50 bg-card/80 backdrop-blur-sm hover:shadow-soft hover:scale-[1.02] transition-all duration-500 animate-fade-in [animation-delay:400ms]">
-              <div className="flex items-start gap-4">
-                <div className="p-3 bg-gradient-hero rounded-xl shadow-soft flex-shrink-0">
-                  <Brain className="w-6 h-6 text-white" />
-                </div>
-                <div>
-                  <h3 className="text-xl font-medium text-foreground mb-3">
-                    {values[2].title}
-                  </h3>
-                  <p className="text-muted-foreground leading-relaxed">
-                    {values[2].description}
-                  </p>
-                </div>
-              </div>
-            </Card>
-
-            {/* Compact cards for last two values */}
-            <Card className="md:col-span-2 lg:col-span-3 p-5 shadow-card border-border/50 bg-secondary/30 backdrop-blur-sm hover:shadow-soft hover:scale-[1.02] transition-all duration-500 animate-fade-in [animation-delay:600ms]">
-              <div className="flex items-center gap-3">
-                <div className="p-2.5 bg-gradient-trust rounded-lg shadow-soft flex-shrink-0">
-                  <Shield className="w-5 h-5 text-white" />
-                </div>
-                <div>
-                  <h3 className="text-lg font-medium text-foreground mb-2">
-                    {values[3].title}
-                  </h3>
-                  <p className="text-sm text-muted-foreground leading-relaxed">
-                    {values[3].description}
-                  </p>
-                </div>
-              </div>
-            </Card>
-
-            <Card className="md:col-span-2 lg:col-span-3 p-5 shadow-card border-border/50 bg-accent/10 backdrop-blur-sm hover:shadow-soft hover:scale-[1.02] transition-all duration-500 animate-fade-in [animation-delay:800ms]">
-              <div className="flex items-center gap-3">
-                <div className="p-2.5 bg-gradient-hero rounded-lg shadow-soft flex-shrink-0">
-                  <Scale className="w-5 h-5 text-white" />
-                </div>
-                <div>
-                  <h3 className="text-lg font-medium text-foreground mb-2">
-                    {values[4].title}
-                  </h3>
-                  <p className="text-sm text-muted-foreground leading-relaxed">
-                    {values[4].description}
-                  </p>
-                </div>
-              </div>
-            </Card>
+            {/* Floating decorative elements */}
+            <div className="absolute top-10 left-10 w-8 h-8 bg-primary/10 rounded-full blur-sm animate-pulse" />
+            <div className="absolute bottom-10 right-10 w-6 h-6 bg-accent/10 rounded-full blur-sm animate-pulse [animation-delay:1.5s]" />
+            <div className="absolute top-1/3 right-16 w-4 h-4 bg-secondary/20 rounded-full blur-sm animate-pulse [animation-delay:2s]" />
           </div>
 
-          {/* Decorative floating elements */}
-          <div className="absolute -top-8 -left-8 w-16 h-16 bg-primary/5 rounded-full blur-xl animate-pulse" />
-          <div className="absolute -bottom-4 -right-4 w-12 h-12 bg-accent/5 rounded-full blur-lg animate-pulse [animation-delay:1s]" />
+          {/* Mobile fallback - stack vertically on small screens */}
+          <div className="block md:hidden absolute inset-0 bg-gradient-soft/50 backdrop-blur-sm">
+            <div className="flex flex-col items-center justify-center h-full gap-4 px-4">
+              {values.map((value, index) => (
+                <Card 
+                  key={index}
+                  className="w-full max-w-sm p-4 shadow-card border-border/50 bg-card/80 backdrop-blur-sm animate-fade-in"
+                  style={{ animationDelay: `${index * 150}ms` }}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-gradient-hero rounded-lg shadow-soft flex-shrink-0">
+                      <value.icon className="w-5 h-5 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-medium text-foreground mb-1">
+                        {value.title}
+                      </h3>
+                      <p className="text-xs text-muted-foreground">
+                        {value.description}
+                      </p>
+                    </div>
+                  </div>
+                </Card>
+              ))}
+            </div>
+          </div>
         </div>
 
         {/* Mission statement */}
