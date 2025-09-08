@@ -58,7 +58,7 @@ const AboutSection = () => {
               return (
                 <Card 
                   key={index}
-                  className="absolute w-64 p-6 shadow-card border-border/50 bg-card/80 backdrop-blur-sm hover:shadow-soft hover:scale-105 transition-all duration-500 animate-fade-in"
+                  className="absolute w-64 h-64 p-6 shadow-card border-border/50 bg-card/80 backdrop-blur-sm hover:shadow-soft hover:scale-105 transition-all duration-500 animate-fade-in flex flex-col"
                   style={{
                     left: '50%',
                     top: '50%',
@@ -66,16 +66,18 @@ const AboutSection = () => {
                     animationDelay: `${index * 200}ms`
                   }}
                 >
-                  <div className="flex flex-col items-center text-center">
-                    <div className="p-3 bg-gradient-hero rounded-xl shadow-soft mb-4">
+                  <div className="flex flex-col items-center text-center h-full justify-between">
+                    <div className="p-3 bg-gradient-hero rounded-xl shadow-soft mb-3 flex-shrink-0">
                       <value.icon className="w-6 h-6 text-white" />
                     </div>
-                    <h3 className="text-lg font-medium text-foreground mb-3">
-                      {value.title}
-                    </h3>
-                    <p className="text-sm text-muted-foreground leading-relaxed">
-                      {value.description}
-                    </p>
+                    <div className="flex-1 flex flex-col justify-center">
+                      <h3 className="text-lg font-medium text-foreground mb-3 line-clamp-2">
+                        {value.title}
+                      </h3>
+                      <p className="text-sm text-muted-foreground leading-relaxed line-clamp-4">
+                        {value.description}
+                      </p>
+                    </div>
                   </div>
                 </Card>
               );
