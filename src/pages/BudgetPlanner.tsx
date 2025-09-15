@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,10 +9,10 @@ import { Progress } from "@/components/ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { PieChart, PlusCircle, Trash2, TrendingUp, TrendingDown, DollarSign, Wallet, Lock, UserPlus } from "lucide-react";
 import Navigation from "@/components/Navigation";
-import ConsentBanner from "@/components/ConsentBanner";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
-import { useDataCollection } from "@/hooks/useDataCollection";
+import { useToolSession } from "@/hooks/useToolSession";
+import ConsentDialog from "@/components/ConsentDialog";
 
 interface BudgetItem {
   id: number;
@@ -51,17 +51,41 @@ const categories: BudgetCategory[] = [
 const BudgetPlanner = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const { saveToolData, updateToolData } = useDataCollection();
+  const { sessionId, saveToolSession, updateSessionData } = useToolSession();
   const [items, setItems] = useState<BudgetItem[]>([]);
-  const [sessionId, setSessionId] = useState<string | null>(null);
   const [newItem, setNewItem] = useState({
     name: "",
     amount: "",
     category: "",
     type: "income" as 'income' | 'expense'
   });
+  const [showConsentDialog, setShowConsentDialog] = useState(false);
+  const [hasShownConsent, setHasShownConsent] = useState(false);
 
-  const addItem = async () => {
+  // Show consent dialog when user first interacts with tool
+  useEffect(() => {
+    if (items.length > 0 && !hasShownConsent) {
+      setShowConsentDialog(true);
+      setHasShownConsent(true);
+    }
+  }, [items.length, hasShownConsent]);
+
+  // Update session data when items change
+  useEffect(() => {
+    if (sessionId && items.length > 0) {
+      const totalIncome = items.filter(item => item.type === 'income').reduce((sum, item) => sum + item.amount, 0);
+      const totalExpenses = items.filter(item => item.type === 'expense').reduce((sum, item) => sum + item.amount, 0);
+      const netIncome = totalIncome - totalExpenses;
+      updateSessionData(sessionId, { items, totalIncome, totalExpenses, netIncome });
+    }
+  }, [items, sessionId, updateSessionData]);
+
+  const handleConsentResponse = async (consented: boolean) => {
+    setShowConsentDialog(false);
+    await saveToolSession('budget_planner', { items }, consented);
+  };
+
+  const addItem = () => {
     // Check if user is not authenticated and already has 1 item
     if (!user && items.length >= 1) {
       return; // Don't add more items for non-authenticated users
@@ -75,42 +99,13 @@ const BudgetPlanner = () => {
         category: newItem.category,
         type: newItem.type
       };
-      const updatedItems = [...items, item];
-      setItems(updatedItems);
+      setItems([...items, item]);
       setNewItem({ name: "", amount: "", category: "", type: "income" });
-      
-      // Save or update session data
-      await saveSessionData(updatedItems);
     }
   };
 
-  const removeItem = async (id: number) => {
-    const updatedItems = items.filter(item => item.id !== id);
-    setItems(updatedItems);
-    await saveSessionData(updatedItems);
-  };
-
-  const saveSessionData = async (itemsData: BudgetItem[]) => {
-    const totalIncome = itemsData.filter(item => item.type === 'income').reduce((sum, item) => sum + item.amount, 0);
-    const totalExpenses = itemsData.filter(item => item.type === 'expense').reduce((sum, item) => sum + item.amount, 0);
-    
-    const toolData = {
-      items: itemsData,
-      timestamp: new Date().toISOString(),
-      totalIncome,
-      totalExpenses,
-      netIncome: totalIncome - totalExpenses,
-      savingsRate: totalIncome > 0 ? ((totalIncome - totalExpenses) / totalIncome * 100) : 0
-    };
-
-    if (sessionId) {
-      await updateToolData(sessionId, toolData);
-    } else {
-      const newSessionId = await saveToolData('budget_planner', toolData);
-      if (newSessionId) {
-        setSessionId(newSessionId);
-      }
-    }
+  const removeItem = (id: number) => {
+    setItems(items.filter(item => item.id !== id));
   };
 
   const totalIncome = items.filter(item => item.type === 'income').reduce((sum, item) => sum + item.amount, 0);
@@ -419,20 +414,19 @@ const BudgetPlanner = () => {
                     <div className="p-6 bg-gradient-soft rounded-2xl">
                       <h3 className="font-semibold text-foreground mb-3">50/30/20 regel</h3>
                       <div className="space-y-2 text-sm">
-                        <div>Behov (50%): {(totalIncome * 0.5).toLocaleString('da-DK')} kr.</div>
-                        <div>Ønsker (30%): {(totalIncome * 0.3).toLocaleString('da-DK')} kr.</div>
-                        <div>Opsparing (20%): {(totalIncome * 0.2).toLocaleString('da-DK')} kr.</div>
+                        <p>50% til behov: {(totalIncome * 0.5).toLocaleString('da-DK')} kr.</p>
+                        <p>30% til ønsker: {(totalIncome * 0.3).toLocaleString('da-DK')} kr.</p>
+                        <p>20% til opsparing: {(totalIncome * 0.2).toLocaleString('da-DK')} kr.</p>
                       </div>
                     </div>
 
-                    <div className="p-6 bg-accent/10 rounded-2xl">
-                      <h3 className="font-semibold text-foreground mb-3">💡 Anbefalinger</h3>
+                    <div className="p-6 bg-accent/10 rounded-2xl border border-accent/20">
+                      <h3 className="font-semibold text-foreground mb-3">💡 Tips</h3>
                       <ul className="text-sm text-muted-foreground space-y-1">
-                        {savingsRate < 10 && <li>• Prøv at spare mindst 10% af din indkomst</li>}
-                        {savingsRate < 0 && <li>• Fokuser på at reducere udgifter</li>}
-                        {totalExpenses > totalIncome * 0.8 && <li>• Dine udgifter er høje i forhold til din indkomst</li>}
-                        {Object.values(expensesByCategory).some(amount => amount > totalExpenses * 0.4) && 
-                         <li>• En kategori udgør meget af dit budget - overvejer at optimere</li>}
+                        <li>• Gennemgå dine abonnementer</li>
+                        <li>• Sammenlign priser på forsikringer</li>
+                        <li>• Automatiser din opsparing</li>
+                        <li>• Lav en nødopsparing først</li>
                       </ul>
                     </div>
                   </div>
@@ -442,7 +436,12 @@ const BudgetPlanner = () => {
           </Tabs>
         </div>
       </main>
-      <ConsentBanner />
+      
+      <ConsentDialog
+        isOpen={showConsentDialog}
+        onClose={handleConsentResponse}
+        toolName="budget_planner"
+      />
     </div>
   );
 };

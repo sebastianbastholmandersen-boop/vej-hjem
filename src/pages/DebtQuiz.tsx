@@ -1,12 +1,12 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { CheckCircle, AlertTriangle, Info, ArrowLeft, ArrowRight, RotateCcw } from "lucide-react";
 import Navigation from "@/components/Navigation";
-import ConsentBanner from "@/components/ConsentBanner";
-import { useDataCollection } from "@/hooks/useDataCollection";
+import { useToolSession } from "@/hooks/useToolSession";
+import ConsentDialog from "@/components/ConsentDialog";
 
 interface Question {
   id: number;
@@ -138,13 +138,48 @@ const results: Record<string, Result> = {
 };
 
 const DebtQuiz = () => {
-  const { saveToolData } = useDataCollection();
+  const { sessionId, saveToolSession, updateSessionData } = useToolSession();
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [answers, setAnswers] = useState<number[]>([]);
   const [isCompleted, setIsCompleted] = useState(false);
-  const [sessionId, setSessionId] = useState<string | null>(null);
+  const [showConsentDialog, setShowConsentDialog] = useState(false);
+  const [hasShownConsent, setHasShownConsent] = useState(false);
 
-  const handleAnswer = async (points: number) => {
+  // Show consent dialog when user completes quiz
+  useEffect(() => {
+    if (isCompleted && !hasShownConsent) {
+      setShowConsentDialog(true);
+      setHasShownConsent(true);
+    }
+  }, [isCompleted, hasShownConsent]);
+
+  // Update session data when quiz is completed
+  useEffect(() => {
+    if (sessionId && isCompleted) {
+      const result = calculateResult();
+      const totalPoints = answers.reduce((sum, points) => sum + points, 0);
+      updateSessionData(sessionId, { 
+        answers, 
+        totalPoints, 
+        result: result.severity,
+        recommendations: result.recommendations
+      });
+    }
+  }, [isCompleted, sessionId, updateSessionData, answers]);
+
+  const handleConsentResponse = async (consented: boolean) => {
+    setShowConsentDialog(false);
+    const result = calculateResult();
+    const totalPoints = answers.reduce((sum, points) => sum + points, 0);
+    await saveToolSession('debt_quiz', { 
+      answers, 
+      totalPoints, 
+      result: result.severity,
+      recommendations: result.recommendations
+    }, consented);
+  };
+
+  const handleAnswer = (points: number) => {
     const newAnswers = [...answers];
     newAnswers[currentQuestion] = points;
     setAnswers(newAnswers);
@@ -153,29 +188,6 @@ const DebtQuiz = () => {
       setCurrentQuestion(currentQuestion + 1);
     } else {
       setIsCompleted(true);
-      // Save quiz results when completed
-      await saveQuizResults(newAnswers);
-    }
-  };
-
-  const saveQuizResults = async (answersData: number[]) => {
-    const totalPoints = answersData.reduce((sum, points) => sum + points, 0);
-    const result = calculateResult();
-    
-    const toolData = {
-      answers: answersData,
-      totalPoints,
-      result: {
-        severity: result.severity,
-        title: result.title
-      },
-      timestamp: new Date().toISOString(),
-      questionsCount: questions.length
-    };
-
-    const newSessionId = await saveToolData('debt_quiz', toolData);
-    if (newSessionId) {
-      setSessionId(newSessionId);
     }
   };
 
@@ -191,6 +203,7 @@ const DebtQuiz = () => {
     setCurrentQuestion(0);
     setAnswers([]);
     setIsCompleted(false);
+    setHasShownConsent(false);
   };
 
   const goToPrevious = () => {
@@ -348,7 +361,12 @@ const DebtQuiz = () => {
           )}
         </div>
       </main>
-      <ConsentBanner />
+      
+      <ConsentDialog
+        isOpen={showConsentDialog}
+        onClose={handleConsentResponse}
+        toolName="debt_quiz"
+      />
     </div>
   );
 };

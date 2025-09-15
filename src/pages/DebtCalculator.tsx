@@ -7,10 +7,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Calculator, PlusCircle, Trash2, AlertCircle, Lock, UserPlus } from "lucide-react";
 import Navigation from "@/components/Navigation";
-import ConsentBanner from "@/components/ConsentBanner";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
-import { useDataCollection } from "@/hooks/useDataCollection";
+import { useToolSession } from "@/hooks/useToolSession";
+import ConsentDialog from "@/components/ConsentDialog";
 
 interface Debt {
   id: number;
@@ -23,17 +23,43 @@ interface Debt {
 const DebtCalculator = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const { saveToolData, updateToolData } = useDataCollection();
+  const { sessionId, saveToolSession, updateSessionData } = useToolSession();
   const [debts, setDebts] = useState<Debt[]>([]);
-  const [sessionId, setSessionId] = useState<string | null>(null);
   const [newDebt, setNewDebt] = useState({
     name: "",
     balance: "",
     minPayment: "",
     interestRate: ""
   });
+  const [showConsentDialog, setShowConsentDialog] = useState(false);
+  const [hasShownConsent, setHasShownConsent] = useState(false);
 
-  const addDebt = async () => {
+  // Show consent dialog when user first interacts with tool
+  useEffect(() => {
+    if (debts.length > 0 && !hasShownConsent) {
+      setShowConsentDialog(true);
+      setHasShownConsent(true);
+    }
+  }, [debts.length, hasShownConsent]);
+
+  // Update session data when debts change
+  useEffect(() => {
+    if (sessionId && debts.length > 0) {
+      const totalDebt = debts.reduce((sum, debt) => sum + debt.balance, 0);
+      const totalMinPayments = debts.reduce((sum, debt) => sum + debt.minPayment, 0);
+      const averageInterestRate = debts.length > 0 
+        ? debts.reduce((sum, debt) => sum + (debt.interestRate * debt.balance), 0) / totalDebt
+        : 0;
+      updateSessionData(sessionId, { debts, totalDebt, totalMinPayments, averageInterestRate });
+    }
+  }, [debts, sessionId, updateSessionData]);
+
+  const handleConsentResponse = async (consented: boolean) => {
+    setShowConsentDialog(false);
+    await saveToolSession('debt_calculator', { debts }, consented);
+  };
+
+  const addDebt = () => {
     // Check if user is not authenticated and already has 1 debt
     if (!user && debts.length >= 1) {
       return; // Don't add more debts for non-authenticated users
@@ -47,37 +73,13 @@ const DebtCalculator = () => {
         minPayment: parseFloat(newDebt.minPayment),
         interestRate: parseFloat(newDebt.interestRate)
       };
-      const updatedDebts = [...debts, debt];
-      setDebts(updatedDebts);
+      setDebts([...debts, debt]);
       setNewDebt({ name: "", balance: "", minPayment: "", interestRate: "" });
-      
-      // Save or update session data
-      await saveSessionData(updatedDebts);
     }
   };
 
-  const removeDebt = async (id: number) => {
-    const updatedDebts = debts.filter(debt => debt.id !== id);
-    setDebts(updatedDebts);
-    await saveSessionData(updatedDebts);
-  };
-
-  const saveSessionData = async (debtsData: Debt[]) => {
-    const toolData = {
-      debts: debtsData,
-      timestamp: new Date().toISOString(),
-      totalDebt: debtsData.reduce((sum, debt) => sum + debt.balance, 0),
-      totalMinPayments: debtsData.reduce((sum, debt) => sum + debt.minPayment, 0)
-    };
-
-    if (sessionId) {
-      await updateToolData(sessionId, toolData);
-    } else {
-      const newSessionId = await saveToolData('debt_calculator', toolData);
-      if (newSessionId) {
-        setSessionId(newSessionId);
-      }
-    }
+  const removeDebt = (id: number) => {
+    setDebts(debts.filter(debt => debt.id !== id));
   };
 
   const totalDebt = debts.reduce((sum, debt) => sum + debt.balance, 0);
@@ -353,7 +355,12 @@ const DebtCalculator = () => {
           </Tabs>
         </div>
       </main>
-      <ConsentBanner />
+      
+      <ConsentDialog
+        isOpen={showConsentDialog}
+        onClose={handleConsentResponse}
+        toolName="debt_calculator"
+      />
     </div>
   );
 };
