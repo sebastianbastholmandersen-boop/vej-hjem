@@ -7,8 +7,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { PieChart, PlusCircle, Trash2, TrendingUp, TrendingDown, DollarSign, Wallet } from "lucide-react";
+import { PieChart, PlusCircle, Trash2, TrendingUp, TrendingDown, DollarSign, Wallet, Lock, UserPlus } from "lucide-react";
 import Navigation from "@/components/Navigation";
+import { useAuth } from "@/hooks/useAuth";
+import { useNavigate } from "react-router-dom";
 
 interface BudgetItem {
   id: number;
@@ -45,6 +47,8 @@ const categories: BudgetCategory[] = [
 ];
 
 const BudgetPlanner = () => {
+  const { user } = useAuth();
+  const navigate = useNavigate();
   const [items, setItems] = useState<BudgetItem[]>([]);
   const [newItem, setNewItem] = useState({
     name: "",
@@ -54,6 +58,11 @@ const BudgetPlanner = () => {
   });
 
   const addItem = () => {
+    // Check if user is not authenticated and already has 1 item
+    if (!user && items.length >= 1) {
+      return; // Don't add more items for non-authenticated users
+    }
+
     if (newItem.name && newItem.amount && newItem.category) {
       const item: BudgetItem = {
         id: Date.now(),
@@ -188,10 +197,30 @@ const BudgetPlanner = () => {
                     </div>
 
                     <div className="flex items-end">
-                      <Button onClick={addItem} className="w-full bg-gradient-hero">
-                        <PlusCircle className="w-4 h-4 mr-2" />
-                        Tilføj
-                      </Button>
+                      {!user && items.length >= 1 ? (
+                        <Card className="bg-gradient-hero text-white p-4 w-full">
+                          <div className="flex items-center gap-3 mb-3">
+                            <Lock className="w-5 h-5" />
+                            <h3 className="font-semibold text-sm">Opret bruger for flere poster</h3>
+                          </div>
+                          <p className="text-xs opacity-90 mb-4">
+                            Kun én budgetpost som gæst. Opret gratis bruger for ubegrænset adgang.
+                          </p>
+                          <Button 
+                            onClick={() => navigate('/auth')} 
+                            variant="secondary" 
+                            className="w-full bg-white text-primary hover:bg-gray-100 text-sm py-2"
+                          >
+                            <UserPlus className="w-3 h-3 mr-2" />
+                            Opret bruger
+                          </Button>
+                        </Card>
+                      ) : (
+                        <Button onClick={addItem} className="w-full bg-gradient-hero">
+                          <PlusCircle className="w-4 h-4 mr-2" />
+                          Tilføj
+                        </Button>
+                      )}
                     </div>
                   </div>
                 </CardContent>

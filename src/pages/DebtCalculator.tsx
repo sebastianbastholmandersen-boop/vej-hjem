@@ -5,8 +5,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { Calculator, PlusCircle, Trash2, AlertCircle } from "lucide-react";
+import { Calculator, PlusCircle, Trash2, AlertCircle, Lock, UserPlus } from "lucide-react";
 import Navigation from "@/components/Navigation";
+import { useAuth } from "@/hooks/useAuth";
+import { useNavigate } from "react-router-dom";
 
 interface Debt {
   id: number;
@@ -17,6 +19,8 @@ interface Debt {
 }
 
 const DebtCalculator = () => {
+  const { user } = useAuth();
+  const navigate = useNavigate();
   const [debts, setDebts] = useState<Debt[]>([]);
   const [newDebt, setNewDebt] = useState({
     name: "",
@@ -26,6 +30,11 @@ const DebtCalculator = () => {
   });
 
   const addDebt = () => {
+    // Check if user is not authenticated and already has 1 debt
+    if (!user && debts.length >= 1) {
+      return; // Don't add more debts for non-authenticated users
+    }
+
     if (newDebt.name && newDebt.balance && newDebt.minPayment && newDebt.interestRate) {
       const debt: Debt = {
         id: Date.now(),
@@ -152,10 +161,30 @@ const DebtCalculator = () => {
                     />
                   </div>
                   <div className="md:col-span-2 lg:col-span-4">
-                    <Button onClick={addDebt} className="w-full bg-gradient-hero">
-                      <PlusCircle className="w-4 h-4 mr-2" />
-                      Tilføj gæld
-                    </Button>
+                    {!user && debts.length >= 1 ? (
+                      <Card className="bg-gradient-hero text-white p-4">
+                        <div className="flex items-center gap-3 mb-3">
+                          <Lock className="w-5 h-5" />
+                          <h3 className="font-semibold">Opret bruger for flere gældsposter</h3>
+                        </div>
+                        <p className="text-sm opacity-90 mb-4">
+                          Du kan kun tilføje én gæld som gæst. Opret en gratis bruger for at få adgang til alle funktioner.
+                        </p>
+                        <Button 
+                          onClick={() => navigate('/auth')} 
+                          variant="secondary" 
+                          className="w-full bg-white text-primary hover:bg-gray-100"
+                        >
+                          <UserPlus className="w-4 h-4 mr-2" />
+                          Opret bruger gratis
+                        </Button>
+                      </Card>
+                    ) : (
+                      <Button onClick={addDebt} className="w-full bg-gradient-hero">
+                        <PlusCircle className="w-4 h-4 mr-2" />
+                        Tilføj gæld
+                      </Button>
+                    )}
                   </div>
                 </CardContent>
               </Card>
