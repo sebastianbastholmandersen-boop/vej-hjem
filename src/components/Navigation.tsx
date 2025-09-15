@@ -23,6 +23,12 @@ const Navigation = () => {
     { label: "Om os", id: "about" }
   ];
 
+  const toolItems = [
+    { label: "Gældskalkulator", path: "/gaeldskalkulator" },
+    { label: "Selvvurdering", path: "/selvvurdering" },
+    { label: "Budgetplanner", path: "/budgetplan" }
+  ];
+
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-card/80 backdrop-blur-md border-b border-border/50">
       <div className="max-w-7xl mx-auto px-6">
@@ -51,6 +57,29 @@ const Navigation = () => {
                 {item.label}
               </button>
             ))}
+            
+            {/* Værktøjer dropdown */}
+            <div className="relative group">
+              <button className="text-sm text-muted-foreground hover:text-foreground transition-colors duration-200 flex items-center gap-1">
+                Værktøjer
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+              <div className="absolute top-full left-0 mt-2 w-48 bg-card rounded-xl shadow-card border border-border/50 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                <div className="p-2">
+                  {toolItems.map((tool) => (
+                    <Link
+                      key={tool.path}
+                      to={tool.path}
+                      className="block px-3 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-secondary/50 rounded-lg transition-colors duration-200"
+                    >
+                      {tool.label}
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            </div>
             
             {!loading && (
               user ? (
@@ -110,6 +139,22 @@ const Navigation = () => {
                   {item.label}
                 </button>
               ))}
+              
+              {/* Mobile værktøjer */}
+              <div className="border-t border-border/50 pt-3 mt-3">
+                <p className="text-xs uppercase tracking-wide text-muted-foreground mb-2 px-2">Værktøjer</p>
+                {toolItems.map((tool) => (
+                  <Link
+                    key={tool.path}
+                    to={tool.path}
+                    className="block py-2 text-muted-foreground hover:text-foreground transition-colors duration-200"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    {tool.label}
+                  </Link>
+                ))}
+              </div>
+              
               <Button 
                 onClick={() => scrollToSection('ai-chat')}
                 className="bg-gradient-hero hover:shadow-soft rounded-xl mt-2"
