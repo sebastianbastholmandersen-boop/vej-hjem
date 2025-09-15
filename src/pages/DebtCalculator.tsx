@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,8 +7,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Calculator, PlusCircle, Trash2, AlertCircle, Lock, UserPlus } from "lucide-react";
 import Navigation from "@/components/Navigation";
+import ConsentBanner from "@/components/ConsentBanner";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
+import { useDataCollection } from "@/hooks/useDataCollection";
 
 interface Debt {
   id: number;
@@ -21,7 +23,9 @@ interface Debt {
 const DebtCalculator = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { saveToolData, updateToolData } = useDataCollection();
   const [debts, setDebts] = useState<Debt[]>([]);
+  const [sessionId, setSessionId] = useState<string | null>(null);
   const [newDebt, setNewDebt] = useState({
     name: "",
     balance: "",
@@ -29,7 +33,7 @@ const DebtCalculator = () => {
     interestRate: ""
   });
 
-  const addDebt = () => {
+  const addDebt = async () => {
     // Check if user is not authenticated and already has 1 debt
     if (!user && debts.length >= 1) {
       return; // Don't add more debts for non-authenticated users
@@ -43,13 +47,37 @@ const DebtCalculator = () => {
         minPayment: parseFloat(newDebt.minPayment),
         interestRate: parseFloat(newDebt.interestRate)
       };
-      setDebts([...debts, debt]);
+      const updatedDebts = [...debts, debt];
+      setDebts(updatedDebts);
       setNewDebt({ name: "", balance: "", minPayment: "", interestRate: "" });
+      
+      // Save or update session data
+      await saveSessionData(updatedDebts);
     }
   };
 
-  const removeDebt = (id: number) => {
-    setDebts(debts.filter(debt => debt.id !== id));
+  const removeDebt = async (id: number) => {
+    const updatedDebts = debts.filter(debt => debt.id !== id);
+    setDebts(updatedDebts);
+    await saveSessionData(updatedDebts);
+  };
+
+  const saveSessionData = async (debtsData: Debt[]) => {
+    const toolData = {
+      debts: debtsData,
+      timestamp: new Date().toISOString(),
+      totalDebt: debtsData.reduce((sum, debt) => sum + debt.balance, 0),
+      totalMinPayments: debtsData.reduce((sum, debt) => sum + debt.minPayment, 0)
+    };
+
+    if (sessionId) {
+      await updateToolData(sessionId, toolData);
+    } else {
+      const newSessionId = await saveToolData('debt_calculator', toolData);
+      if (newSessionId) {
+        setSessionId(newSessionId);
+      }
+    }
   };
 
   const totalDebt = debts.reduce((sum, debt) => sum + debt.balance, 0);
@@ -325,6 +353,7 @@ const DebtCalculator = () => {
           </Tabs>
         </div>
       </main>
+      <ConsentBanner />
     </div>
   );
 };

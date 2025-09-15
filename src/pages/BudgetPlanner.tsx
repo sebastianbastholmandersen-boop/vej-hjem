@@ -9,8 +9,10 @@ import { Progress } from "@/components/ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { PieChart, PlusCircle, Trash2, TrendingUp, TrendingDown, DollarSign, Wallet, Lock, UserPlus } from "lucide-react";
 import Navigation from "@/components/Navigation";
+import ConsentBanner from "@/components/ConsentBanner";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
+import { useDataCollection } from "@/hooks/useDataCollection";
 
 interface BudgetItem {
   id: number;
@@ -49,7 +51,9 @@ const categories: BudgetCategory[] = [
 const BudgetPlanner = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { saveToolData, updateToolData } = useDataCollection();
   const [items, setItems] = useState<BudgetItem[]>([]);
+  const [sessionId, setSessionId] = useState<string | null>(null);
   const [newItem, setNewItem] = useState({
     name: "",
     amount: "",
@@ -57,7 +61,7 @@ const BudgetPlanner = () => {
     type: "income" as 'income' | 'expense'
   });
 
-  const addItem = () => {
+  const addItem = async () => {
     // Check if user is not authenticated and already has 1 item
     if (!user && items.length >= 1) {
       return; // Don't add more items for non-authenticated users
@@ -71,13 +75,42 @@ const BudgetPlanner = () => {
         category: newItem.category,
         type: newItem.type
       };
-      setItems([...items, item]);
+      const updatedItems = [...items, item];
+      setItems(updatedItems);
       setNewItem({ name: "", amount: "", category: "", type: "income" });
+      
+      // Save or update session data
+      await saveSessionData(updatedItems);
     }
   };
 
-  const removeItem = (id: number) => {
-    setItems(items.filter(item => item.id !== id));
+  const removeItem = async (id: number) => {
+    const updatedItems = items.filter(item => item.id !== id);
+    setItems(updatedItems);
+    await saveSessionData(updatedItems);
+  };
+
+  const saveSessionData = async (itemsData: BudgetItem[]) => {
+    const totalIncome = itemsData.filter(item => item.type === 'income').reduce((sum, item) => sum + item.amount, 0);
+    const totalExpenses = itemsData.filter(item => item.type === 'expense').reduce((sum, item) => sum + item.amount, 0);
+    
+    const toolData = {
+      items: itemsData,
+      timestamp: new Date().toISOString(),
+      totalIncome,
+      totalExpenses,
+      netIncome: totalIncome - totalExpenses,
+      savingsRate: totalIncome > 0 ? ((totalIncome - totalExpenses) / totalIncome * 100) : 0
+    };
+
+    if (sessionId) {
+      await updateToolData(sessionId, toolData);
+    } else {
+      const newSessionId = await saveToolData('budget_planner', toolData);
+      if (newSessionId) {
+        setSessionId(newSessionId);
+      }
+    }
   };
 
   const totalIncome = items.filter(item => item.type === 'income').reduce((sum, item) => sum + item.amount, 0);
@@ -409,6 +442,7 @@ const BudgetPlanner = () => {
           </Tabs>
         </div>
       </main>
+      <ConsentBanner />
     </div>
   );
 };

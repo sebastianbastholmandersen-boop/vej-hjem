@@ -274,6 +274,42 @@ export type Database = {
         }
         Relationships: []
       }
+      tool_sessions: {
+        Row: {
+          consented: boolean
+          created_at: string
+          id: string
+          ip_address: unknown | null
+          session_data: Json
+          tool_name: string
+          updated_at: string
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          consented?: boolean
+          created_at?: string
+          id?: string
+          ip_address?: unknown | null
+          session_data: Json
+          tool_name: string
+          updated_at?: string
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          consented?: boolean
+          created_at?: string
+          id?: string
+          ip_address?: unknown | null
+          session_data?: Json
+          tool_name?: string
+          updated_at?: string
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string

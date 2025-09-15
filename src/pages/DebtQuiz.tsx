@@ -5,6 +5,8 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { CheckCircle, AlertTriangle, Info, ArrowLeft, ArrowRight, RotateCcw } from "lucide-react";
 import Navigation from "@/components/Navigation";
+import ConsentBanner from "@/components/ConsentBanner";
+import { useDataCollection } from "@/hooks/useDataCollection";
 
 interface Question {
   id: number;
@@ -136,11 +138,13 @@ const results: Record<string, Result> = {
 };
 
 const DebtQuiz = () => {
+  const { saveToolData } = useDataCollection();
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [answers, setAnswers] = useState<number[]>([]);
   const [isCompleted, setIsCompleted] = useState(false);
+  const [sessionId, setSessionId] = useState<string | null>(null);
 
-  const handleAnswer = (points: number) => {
+  const handleAnswer = async (points: number) => {
     const newAnswers = [...answers];
     newAnswers[currentQuestion] = points;
     setAnswers(newAnswers);
@@ -149,6 +153,29 @@ const DebtQuiz = () => {
       setCurrentQuestion(currentQuestion + 1);
     } else {
       setIsCompleted(true);
+      // Save quiz results when completed
+      await saveQuizResults(newAnswers);
+    }
+  };
+
+  const saveQuizResults = async (answersData: number[]) => {
+    const totalPoints = answersData.reduce((sum, points) => sum + points, 0);
+    const result = calculateResult();
+    
+    const toolData = {
+      answers: answersData,
+      totalPoints,
+      result: {
+        severity: result.severity,
+        title: result.title
+      },
+      timestamp: new Date().toISOString(),
+      questionsCount: questions.length
+    };
+
+    const newSessionId = await saveToolData('debt_quiz', toolData);
+    if (newSessionId) {
+      setSessionId(newSessionId);
     }
   };
 
@@ -321,6 +348,7 @@ const DebtQuiz = () => {
           )}
         </div>
       </main>
+      <ConsentBanner />
     </div>
   );
 };
