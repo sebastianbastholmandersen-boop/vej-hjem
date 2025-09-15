@@ -58,6 +58,14 @@ const Navigation = () => {
               </button>
             ))}
             
+            {/* Business Partners Link */}
+            <Link
+              to="/virksomhedspartnere"
+              className="text-sm text-muted-foreground hover:text-foreground transition-colors duration-200"
+            >
+              For virksomheder
+            </Link>
+            
             {/* Værktøjer dropdown */}
             <div className="relative group">
               <button className="text-sm text-muted-foreground hover:text-foreground transition-colors duration-200 flex items-center gap-1">
@@ -139,6 +147,15 @@ const Navigation = () => {
                   {item.label}
                 </button>
               ))}
+              
+              {/* Business Partners Link for Mobile */}
+              <Link
+                to="/virksomhedspartnere"
+                className="block py-2 text-muted-foreground hover:text-foreground transition-colors duration-200"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                For virksomheder
+              </Link>
               
               {/* Mobile værktøjer */}
               <div className="border-t border-border/50 pt-3 mt-3">

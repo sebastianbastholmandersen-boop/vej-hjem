@@ -10,6 +10,7 @@ import AdminDashboard from "./pages/AdminDashboard";
 import DebtCalculator from "./pages/DebtCalculator";
 import DebtQuiz from "./pages/DebtQuiz";
 import BudgetPlanner from "./pages/BudgetPlanner";
+import BusinessPartners from "./pages/BusinessPartners";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -28,6 +29,7 @@ const App = () => (
             <Route path="/gaeldskalkulator" element={<DebtCalculator />} />
             <Route path="/selvvurdering" element={<DebtQuiz />} />
             <Route path="/budgetplan" element={<BudgetPlanner />} />
+            <Route path="/virksomhedspartnere" element={<BusinessPartners />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
